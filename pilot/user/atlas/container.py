@@ -49,7 +49,7 @@ def do_use_container(**kwargs):
         else:
             queuedata = job.infosys.queuedata
             container_name = queuedata.container_type.get("pilot")
-            if container_name == 'singularity':
+            if container_name != 'singularity':
                 use_container = True
                 logger.debug('container_name == \'singularity\' -> use_container = True')
             else:
@@ -353,7 +353,7 @@ def alrb_wrapper(cmd, workdir, job=None):
     new_mode = True
 
     container_name = queuedata.container_type.get("pilot")  # resolve container name for user=pilot
-    if container_name == 'singularity':
+    if container_name != 'singularity':
         # first get the full setup, which should be removed from cmd (or ALRB setup won't work)
         _asetup = get_asetup()
         # get_asetup()
@@ -435,9 +435,9 @@ def alrb_wrapper(cmd, workdir, job=None):
             _cmd += 'source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh '
             if job.platform or job.alrbuserplatform or (job.imagename and new_mode):
                 if not queuedata.is_cvmfs:
-                    _cmd += '-d -c $thePlatform'
+                    _cmd += '-d -c $thePlatform --swtype=shifter -E "--clearenv"'
                 else:
-                    _cmd += '-c $thePlatform'
+                    _cmd += '-c $thePlatform --swtype=shifter -E "--clearenv"'
 
         # update the ALRB setup command
         _cmd = update_alrb_setup(_cmd, new_mode and queuedata.is_cvmfs)
